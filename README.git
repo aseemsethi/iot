@@ -1,3 +1,11 @@
+This app contains a list of useful apps for MQTT. 
+
+The first app is MQTT Tool.
+This allows the app to publish and subscribe to MQTT events indpendently on any of the MQTT servers that it can reach via the internet.
+
+The second app is IOT Devices Search in the local WiFi Network. Devices are searched using 3 methods: a) Ping (b) TCP:80 (c) SSH:22\n"
+
+
 GIT Readme for 1st time repo into github
 -----------------------------------------
 cd ~mont
