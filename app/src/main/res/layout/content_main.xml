@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="80dp"
+        android:text="This app contains a list of useful apps for MQTT. \n\nThe first app is MQTT Tool.
+        \nThis allows the app to publish and subscribe to MQTT events indpendently on any of the MQTT servers that it can reach via the internet.\n
+        \nThe second app is IOT Devices Search in the local WiFi Network. Devices are searched using 3 methods: a) Ping (b) TCP:80 (c) SSH:22\n"
+         />
+
+</LinearLayout>
