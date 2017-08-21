@@ -30,4 +30,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile files('libs/org.eclipse.paho.android.service-1.1.1.jar')
     compile files('libs/org.eclipse.paho.client.mqttv3-1.1.1.jar')
+    compile files('libs/dnsjava-2.0.0.jar')
 }

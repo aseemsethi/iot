@@ -26,10 +26,21 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeoutException;
 
 import static android.R.attr.value;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
+
+import org.xbill.DNS.DClass;
+import org.xbill.DNS.Lookup;
+import org.xbill.DNS.Record;
+import org.xbill.DNS.Resolver;
+import org.xbill.DNS.SRVRecord;
+import org.xbill.DNS.SimpleResolver;
+import org.xbill.DNS.TXTRecord;
+import org.xbill.DNS.TextParseException;
+import org.xbill.DNS.Type;
 
 /**
  * Created by ASethi on 20-08-2017.
@@ -64,6 +75,8 @@ public class SearchActivity extends AppCompatActivity {
         inputTxt.setText(selfIP.substring(0, selfIP.lastIndexOf('.')+1));
         System.out.println("Aseem:" + selfIP.substring(0, selfIP.lastIndexOf('.')+1));
         subnetScan = selfIP.substring(0, selfIP.lastIndexOf('.')+1);
+
+        //dnsLookup();
 
         Button search = (Button) findViewById(R.id.searchStartB);
         search.setOnClickListener(new View.OnClickListener() {
@@ -199,4 +212,47 @@ public class SearchActivity extends AppCompatActivity {
 
             return super.onOptionsItemSelected(item);
         }
+
+        // Not working
+        public void dnsLookup() {
+            String serviceName = "google.com";
+            Lookup lookup = null;
+            try {
+                //lookup = new Lookup(serviceName, Type.CNAME, DClass.ANY);
+                lookup = new Lookup(serviceName, Type.CNAME);
+            } catch (TextParseException e) {
+                e.printStackTrace();
+            }
+            Resolver resolver = null;
+            try {
+                resolver = new SimpleResolver("8.8.8.8");
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
+
+            lookup.setResolver(resolver);
+            lookup.setCache(null);
+            Record[] records = lookup.run();
+            if (lookup.getResult() == Lookup.SUCCESSFUL) {
+                String responseMessage = null;
+                String listingType = null;
+                for (int i = 0; i < records.length; i++) {
+                    if (records[i] instanceof SRVRecord) {
+                        listingType = ((SRVRecord) records[i]).toString();
+                    }
+                }
+                System.out.println("Found!");
+                System.out.println("Response Message: " + responseMessage);
+                System.out.println("Listing type: " + listingType);
+            } else if (lookup.getResult() == Lookup.HOST_NOT_FOUND) {
+                System.out.println("Not found.");
+            } else if (lookup.getResult() == Lookup.TRY_AGAIN) {
+                System.out.println("Error!1" + lookup.getErrorString());
+            }  else if (lookup.getResult() == Lookup.TYPE_NOT_FOUND) {
+                System.out.println("Error!2");
+            } else if (lookup.getResult() == Lookup.UNRECOVERABLE) {
+                System.out.println("Error!3");
+            }
+        }
+
     }
