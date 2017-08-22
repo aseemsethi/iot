@@ -44,6 +44,7 @@ public class ToolActivity extends AppCompatActivity {
     Boolean connected = false;
     final String publishMessage = "Hello World !";
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy-hh-mm-ss");
+    RecyclerView mRecyclerView;
 
     // Stores all Subscriptions here
     ArrayList<String> mysubsList = new ArrayList<String>();
@@ -68,6 +69,10 @@ public class ToolActivity extends AppCompatActivity {
         pub.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                InputMethodManager inputManager = (InputMethodManager)
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
                 publishMessage();
             }
         });
@@ -83,9 +88,6 @@ public class ToolActivity extends AppCompatActivity {
                 EditText inputTxt = (EditText) findViewById(R.id.mqtt_server);
                 String typedText = inputTxt.getText().toString();
                 serverUri = typedText;
-                EditText inputTopicP = (EditText) findViewById(R.id.mqtt_topicP);
-                String typedTopicP = inputTopicP.getText().toString();
-                publishTopic = typedTopicP;
                 connectToServer();
             }
         });
@@ -134,13 +136,12 @@ public class ToolActivity extends AppCompatActivity {
             }
         });
 
-        RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.history_recycler_view);
+        mRecyclerView = (RecyclerView) findViewById(R.id.history_recycler_view);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         mAdapter = new HistoryAdapter(new ArrayList<String>());
         mRecyclerView.setAdapter(mAdapter);
-
     }
 
     public void updateConnectionButton() {
@@ -226,6 +227,7 @@ public class ToolActivity extends AppCompatActivity {
 
         System.out.println("LOG: " + mainText);
         mAdapter.add(format + ": " + mainText);
+        mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount());
         /* Snackbar.make(findViewById(android.R.id.content), mainText, Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show();
         */
@@ -281,8 +283,11 @@ public class ToolActivity extends AppCompatActivity {
                 addToHistory("Not connected to server");
                 return;
             }
+            EditText inputTopicP = (EditText) findViewById(R.id.mqtt_topicP);
+            String typedTopicP = inputTopicP.getText().toString();
+            publishTopic = typedTopicP;
             System.out.println("Publishing Message: ");
-            addToHistory("Publishing Message: " + publishMessage);
+            addToHistory("Publishing Message: " + publishMessage + "on Topic: " + publishTopic);
             MqttMessage message = new MqttMessage();
             message.setPayload(publishMessage.getBytes());
             mqttAndroidClient.publish(publishTopic, message);
