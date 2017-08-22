@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <TextView
         android:layout_width="wrap_content"
@@ -11,8 +12,21 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="80dp"
-        android:text="This app contains a list of useful apps for MQTT. \n\nThe first app is MQTT Tool.
-        \nThis allows the app to publish and subscribe to MQTT events indpendently on any of the MQTT servers that it can reach via the internet.\n
+        android:fontFamily="cursive"
+        android:gravity="center_vertical"
+        android:text="This app contains a list of useful apps for MQTT."
+        android:textSize="16sp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:text="
+        \nThe first app is MQTT Tool.
+        \nThis allows the app to publish and subscribe to MQTT events independently on any of the MQTT servers that it can reach via the internet.
+        \nA Blank ClientID means, the system uses a default uniqueID appeneded with current millisecond time.
+        \nWhen Disconnecting, the top right Button will turn red, and the client will be unsubscribed from the MQTT servers from all topics
+        \nWhen the Client ID changes, the local subscription list is also purged. It would need to disconnect and connect again.
         \nThe second app is IOT Devices Search in the local WiFi Network. Devices are searched using 3 methods: a) Ping (b) TCP:80 (c) SSH:22\n"
          />
 

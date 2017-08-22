@@ -96,11 +96,19 @@ public class ToolActivity extends AppCompatActivity {
         disconn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                InputMethodManager inputManager = (InputMethodManager)
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
                 try {
                     if(mqttAndroidClient != null)
-                        mqttAndroidClient.disconnect();
-                        mqttAndroidClient = null;
-                        addToHistory("Disconnecting from : " + serverUri);
+                        for (String s : mysubsList) {
+                            mqttAndroidClient.unsubscribe(s);
+                        }
+                    mysubsList.clear();
+                    mqttAndroidClient.disconnect();
+                    mqttAndroidClient = null;
+                    addToHistory("Disconnecting from : " + serverUri);
                 } catch (MqttException e) {
                     e.printStackTrace();
                 }
@@ -125,12 +133,11 @@ public class ToolActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 addToHistory("My subscriptions: ");
+                InputMethodManager inputManager = (InputMethodManager)
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
                 for (String s : mysubsList){
-                    InputMethodManager inputManager = (InputMethodManager)
-                            getSystemService(Context.INPUT_METHOD_SERVICE);
-                    inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
-                            InputMethodManager.HIDE_NOT_ALWAYS);
-
                     addToHistory(s);
                 }
             }
@@ -155,7 +162,17 @@ public class ToolActivity extends AppCompatActivity {
     public void connectToServer() {
         // If the client id is not unique, the earlier subscription in the DB file is used
         // and the client recvd messages not subscribed to in the callback below
-        clientId = clientId + System.currentTimeMillis();
+        EditText cidT = (EditText) findViewById(R.id.clientIDUI);
+        String cid = cidT.getText().toString();
+        if (cid.toString().isEmpty()) {
+            clientId = "AndroidClient" + System.currentTimeMillis();
+            addToHistory("Client ID is null, Using: " + clientId);
+        } else {
+            // When the Client ID changes, we need to clear the subscriptions
+            clientId = cid;
+            addToHistory("Client ID is not null, Using: " + clientId);
+            mysubsList.clear();
+        }
         mqttAndroidClient = new MqttAndroidClient(getApplicationContext(), serverUri, clientId);
         mqttAndroidClient.setCallback(new MqttCallbackExtended() {
             @Override
@@ -163,11 +180,11 @@ public class ToolActivity extends AppCompatActivity {
                 System.out.println("Connection completed: ");
                 connected = true; updateConnectionButton();
                 if (reconnect) {
-                    addToHistory("Reconnected to : " + serverUri);
+                    addToHistory(clientId + " Reconnected to : " + serverUri);
                     // Because Clean Session is true, we need to re-subscribe
                     //subscribeToTopic();
                 } else {
-                    addToHistory("Connected to: " + serverUri);
+                    addToHistory(clientId + " Connected to: " + serverUri);
                 }
             }
 
@@ -238,7 +255,7 @@ public class ToolActivity extends AppCompatActivity {
         String typedTopicS = inputTopicS.getText().toString();
         subscriptionTopic = typedTopicS;
         if (mqttAndroidClient == null) {
-            addToHistory("Not connected to server");
+            addToHistory(clientId + " Not connected to server");
             return;
         }
         // Check if already subscribed to the same topic
@@ -252,14 +269,14 @@ public class ToolActivity extends AppCompatActivity {
             mqttAndroidClient.subscribe(subscriptionTopic, 0, null, new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken iMqttToken) {
-                    System.out.println("Successfully subscribed to topic : " + subscriptionTopic);
-                    addToHistory("Subscribed to : " + subscriptionTopic);
+                    System.out.println(clientId + "Successfully subscribed to topic : " + subscriptionTopic);
+                    addToHistory(clientId + " Subscribed to : " + subscriptionTopic);
                 }
 
                 @Override
                 public void onFailure(IMqttToken iMqttToken, Throwable throwable) {
-                    System.err.println("UnSuccessfully subscribed to topic : " + subscriptionTopic);
-                    addToHistory("Subscription Failure: " + subscriptionTopic);
+                    System.err.println(clientId + " Failed to subscribe to topic : " + subscriptionTopic);
+                    addToHistory(clientId + " Subscription Failure: " + subscriptionTopic);
                 }
             });
 
@@ -287,7 +304,7 @@ public class ToolActivity extends AppCompatActivity {
             String typedTopicP = inputTopicP.getText().toString();
             publishTopic = typedTopicP;
             System.out.println("Publishing Message: ");
-            addToHistory("Publishing Message: " + publishMessage + "on Topic: " + publishTopic);
+            addToHistory(clientId + " Publishing Message: " + publishMessage + "on Topic: " + publishTopic);
             MqttMessage message = new MqttMessage();
             message.setPayload(publishMessage.getBytes());
             mqttAndroidClient.publish(publishTopic, message);
