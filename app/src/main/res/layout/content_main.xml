@@ -7,27 +7,45 @@
     android:orientation="vertical">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="60dp"
         android:fontFamily="cursive"
         android:gravity="center_vertical"
         android:text="This app contains a list of useful apps for MQTT."
         android:textSize="16sp" />
+
     <TextView
+        android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:text="
         \nThe first app is MQTT Tool.
-        \nThis allows the app to publish and subscribe to MQTT events independently on any of the MQTT servers that it can reach via the internet.
+This allows the app to publish and subscribe to MQTT events independently on any of the MQTT servers that it can reach via the internet.
+Enter a MQTT Server, click on Connect and then you can Publish or Subscribe to Topics.
         \nA Blank ClientID means, the system uses a default uniqueID appeneded with current millisecond time.
         \nWhen Disconnecting, the top right Button will turn red, and the client will be unsubscribed from the MQTT servers from all topics
-        \nWhen the Client ID changes, the local subscription list is also purged. It would need to disconnect and connect again.
-        \nThe second app is IOT Devices Search in the local WiFi Network. Devices are searched using 3 methods: a) Ping (b) TCP:80 (c) SSH:22\n"
-         />
+        \nWhen the Client ID changes, the local subscription list is also purged. The user would need to disconnect and connect again.
+        \nNote that when you restart the app, and reuse the same ClientID, subscriptions might still be active in the local DB, even though,
+my subscriptions might not show anything. It is best to use a different client ID in such a case"
+        android:textSize="12sp" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="5dp"
+        android:background="@android:color/holo_blue_light" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:paddingTop="20dp"
+        android:text="The second app is IOT Devices Search in the local WiFi Network. Devices are searched using 3 methods: a) Ping (b) TCP:80 c) SSH:22.
+        \nAs of now, this just searches for all devices in the local network. Work TBD to just look for IOT devices"
+        android:textSize="12sp" />
 </LinearLayout>
