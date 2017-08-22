@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.format.Formatter;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -53,6 +55,9 @@ public class SearchActivity extends AppCompatActivity {
     String subnetScan = "192.168.1.";
     ArrayList<String> subnetList;
     private Handler mHandler = new Handler();
+    private HistoryAdapter mAdapter;
+    RecyclerView mRecyclerView;
+    String temp = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +110,11 @@ public class SearchActivity extends AppCompatActivity {
         });
         // Wait till thread above completes
         // hostsF.setText(subnetList.toString());
+        mRecyclerView = (RecyclerView) findViewById(R.id.iot_recycler_view);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new HistoryAdapter(new ArrayList<String>());
+        mRecyclerView.setAdapter(mAdapter);
     }
 
     @Override
@@ -175,22 +185,29 @@ public class SearchActivity extends AppCompatActivity {
                 public void run() {
                     System.out.println("val: " + val);
                     progress.setProgress(val);
-                    if (hosts != null)
-                        hostsF.setText(hosts.toString());
+                    /* for (String s : hosts) { */
+                    if (temp != null) {
+                        mAdapter.add(temp); temp = null;
+                        mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount());
+                    }
                 }
             });
             try {
                 inetAddress = InetAddress.getByName(subnet + String.valueOf(i));
                 if (inetAddress.isReachable(1000)) {
-                    hosts.add(inetAddress.getHostName());
+                    hosts.add(subnet + String.valueOf(i));
+                    temp = ("Ping: " + subnet + String.valueOf(i));
                     System.out.println("Found Device using Ping: " + inetAddress.getHostName());
                 } else if (isReachable(subnet + String.valueOf(i), 80, 1000)) {
-                    hosts.add(inetAddress.getHostName());
+                    hosts.add(subnet + String.valueOf(i));
+                    temp = ("TCP:80: " + subnet + String.valueOf(i));
                     System.out.println("Found Device using Telnet:80: " + inetAddress.getHostName());
                 } else if (isReachable(subnet + String.valueOf(i), 22, 1000)) {
-                    hosts.add(inetAddress.getHostName());
+                    hosts.add("SSH:22: " + subnet + String.valueOf(i));
+                    temp = ("SSH:22: " + subnet + String.valueOf(i));
                     System.out.println("Found Device using SSH:80: " + inetAddress.getHostName());
-                }
+                } else
+                    temp = null;
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             } catch (IOException e) {
