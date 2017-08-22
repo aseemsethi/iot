@@ -1,5 +1,7 @@
 package com.asethi.mqttapp;
 
+import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -10,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -27,6 +30,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import static android.R.attr.button;
+
 public class ToolActivity extends AppCompatActivity {
 
     private HistoryAdapter mAdapter;
@@ -36,13 +41,28 @@ public class ToolActivity extends AppCompatActivity {
     String clientId = "AndroidClient";
     String subscriptionTopic = "Topic1";
     String publishTopic = "Topic1";
+    Boolean connected = false;
     final String publishMessage = "Hello World !";
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy-hh-mm-ss");
+
+    // Stores all Subscriptions here
+    ArrayList<String> mysubsList = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.tool_activity);
+
+        final Button stat = (Button) findViewById(R.id.button1);
+        stat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (connected)
+                    stat.setBackgroundColor(Color.GREEN);
+                else
+                    stat.setBackgroundColor(Color.RED);
+            }
+        });
 
         Button pub = (Button) findViewById(R.id.publishB);
         pub.setOnClickListener(new View.OnClickListener() {
@@ -56,6 +76,10 @@ public class ToolActivity extends AppCompatActivity {
         conn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                InputMethodManager inputManager = (InputMethodManager)
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
                 EditText inputTxt = (EditText) findViewById(R.id.mqtt_server);
                 String typedText = inputTxt.getText().toString();
                 serverUri = typedText;
@@ -85,7 +109,28 @@ public class ToolActivity extends AppCompatActivity {
         subs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                InputMethodManager inputManager = (InputMethodManager)
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
+
                 subscribeToTopic();
+            }
+        });
+
+        Button mysubs = (Button) findViewById(R.id.mySubsB);
+        mysubs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addToHistory("My subscriptions: ");
+                for (String s : mysubsList){
+                    InputMethodManager inputManager = (InputMethodManager)
+                            getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                            InputMethodManager.HIDE_NOT_ALWAYS);
+
+                    addToHistory(s);
+                }
             }
         });
 
@@ -98,6 +143,14 @@ public class ToolActivity extends AppCompatActivity {
 
     }
 
+    public void updateConnectionButton() {
+        final Button stat = (Button) findViewById(R.id.button1);
+        if (connected)
+            stat.setBackgroundColor(Color.GREEN);
+        else
+            stat.setBackgroundColor(Color.RED);
+    }
+
     public void connectToServer() {
         // If the client id is not unique, the earlier subscription in the DB file is used
         // and the client recvd messages not subscribed to in the callback below
@@ -107,6 +160,7 @@ public class ToolActivity extends AppCompatActivity {
             @Override
             public void connectComplete(boolean reconnect, String s) {
                 System.out.println("Connection completed: ");
+                connected = true; updateConnectionButton();
                 if (reconnect) {
                     addToHistory("Reconnected to : " + serverUri);
                     // Because Clean Session is true, we need to re-subscribe
@@ -120,6 +174,7 @@ public class ToolActivity extends AppCompatActivity {
             public void connectionLost(Throwable throwable) {
                 System.out.println("Connection lost: ");
                 addToHistory("The Connection was lost.");
+                connected = false; updateConnectionButton();
             }
 
             @Override
@@ -150,6 +205,7 @@ public class ToolActivity extends AppCompatActivity {
                     disconnectedBufferOptions.setPersistBuffer(false);
                     disconnectedBufferOptions.setDeleteOldestMessages(false);
                     mqttAndroidClient.setBufferOpts(disconnectedBufferOptions);
+                    connected = true; updateConnectionButton();
                     //subscribeToTopic();
                 }
 
@@ -157,6 +213,7 @@ public class ToolActivity extends AppCompatActivity {
                 public void onFailure(IMqttToken iMqttToken, Throwable throwable) {
                     System.err.println("Failed to connect to : " + serverUri);
                     addToHistory("Failed to connect to: " + serverUri);
+                    connected = false; updateConnectionButton();
                 }
             });
         } catch (MqttException ex) {
@@ -169,15 +226,25 @@ public class ToolActivity extends AppCompatActivity {
 
         System.out.println("LOG: " + mainText);
         mAdapter.add(format + ": " + mainText);
-        Snackbar.make(findViewById(android.R.id.content), mainText, Snackbar.LENGTH_LONG)
+        /* Snackbar.make(findViewById(android.R.id.content), mainText, Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show();
-
+        */
     }
 
     public void subscribeToTopic() {
         EditText inputTopicS = (EditText) findViewById(R.id.mqtt_topicS);
         String typedTopicS = inputTopicS.getText().toString();
         subscriptionTopic = typedTopicS;
+        if (mqttAndroidClient == null) {
+            addToHistory("Not connected to server");
+            return;
+        }
+        // Check if already subscribed to the same topic
+        if (mysubsList.contains(subscriptionTopic)) {
+            addToHistory("Already subscribed to: " + subscriptionTopic);
+            return;
+        }
+        mysubsList.add(subscriptionTopic); //this adds an element to the list.
 
         try {
             mqttAndroidClient.subscribe(subscriptionTopic, 0, null, new IMqttActionListener() {

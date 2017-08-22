@@ -86,6 +86,7 @@ public class SearchActivity extends AppCompatActivity {
                         getSystemService(Context.INPUT_METHOD_SERVICE);
                 inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                         InputMethodManager.HIDE_NOT_ALWAYS);
+
                 EditText inputTxt = (EditText) findViewById(R.id.subnetScanUI);
                 String typedText = inputTxt.getText().toString();
                 subnetScan = typedText;
