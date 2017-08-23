@@ -6,6 +6,15 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -48,4 +57,7 @@ my subscriptions might not show anything. It is best to use a different client I
         android:text="The second app is IOT Devices Search in the local WiFi Network. Devices are searched using 3 methods: a) Ping (b) TCP:80 c) SSH:22.
         \nAs of now, this just searches for all devices in the local network. Work TBD to just look for IOT devices"
         android:textSize="12sp" />
+    </LinearLayout>
+    </ScrollView>
+
 </LinearLayout>

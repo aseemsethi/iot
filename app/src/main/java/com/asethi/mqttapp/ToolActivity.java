@@ -14,7 +14,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
@@ -33,6 +37,7 @@ import java.util.ArrayList;
 import static android.R.attr.button;
 
 public class ToolActivity extends AppCompatActivity {
+    //implements CompoundButton.OnCheckedChangeListener {
 
     private HistoryAdapter mAdapter;
     private MqttAndroidClient mqttAndroidClient;
@@ -45,14 +50,48 @@ public class ToolActivity extends AppCompatActivity {
     final String publishMessage = "Hello World !";
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy-hh-mm-ss");
     RecyclerView mRecyclerView;
+    CheckBox cl, rl;
+    Boolean cleanVar = false;
 
     // Stores all Subscriptions here
     ArrayList<String> mysubsList = new ArrayList<String>();
-
+/*
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (buttonView.getId() == R.id.cleanBUI) {
+            System.out.println("Aseem: isChecked: " + isChecked);
+            if (isChecked) {
+                System.out.println("Aseem: checked is true");
+                cl.setChecked(true);
+            } else {
+                System.out.println("Aseem: checked is false");
+                cl.setChecked(false);
+            }
+        }
+        if (buttonView.getId() == R.id.retainBUI) {
+        }
+    }
+    */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.tool_activity);
+
+        final CheckBox cl = (CheckBox) findViewById(R.id.cleanBUI);
+        cl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (cl.isChecked()) {
+                    System.out.println("Aseem: checked is true");
+                    cleanVar = true;
+                } else {
+                    System.out.println("Aseem: checked is false");
+                    cleanVar = false;
+                }
+            }
+        });
+        rl = (CheckBox) findViewById(R.id.retainBUI);
+
 
         final Button stat = (Button) findViewById(R.id.button1);
         stat.setOnClickListener(new View.OnClickListener() {
@@ -74,6 +113,21 @@ public class ToolActivity extends AppCompatActivity {
                 inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                         InputMethodManager.HIDE_NOT_ALWAYS);
                 publishMessage();
+            }
+        });
+
+        final Button sysBT = (Button) findViewById(R.id.sysB);
+        sysBT.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                InputMethodManager inputManager = (InputMethodManager)
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
+                sysBT.setTextColor( Color.BLUE );
+                EditText inputTopicS = (EditText) findViewById(R.id.mqtt_topicS);
+                inputTopicS.setText("$SYS/#");
+                subscribeToTopic();
             }
         });
 
@@ -101,12 +155,13 @@ public class ToolActivity extends AppCompatActivity {
                 inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                         InputMethodManager.HIDE_NOT_ALWAYS);
                 try {
-                    if(mqttAndroidClient != null)
+                    if(mqttAndroidClient != null) {
                         for (String s : mysubsList) {
                             mqttAndroidClient.unsubscribe(s);
                         }
-                    mysubsList.clear();
-                    mqttAndroidClient.disconnect();
+                        mysubsList.clear();
+                        mqttAndroidClient.disconnect();
+                    }
                     mqttAndroidClient = null;
                     addToHistory("Disconnecting from : " + serverUri);
                 } catch (MqttException e) {
@@ -193,6 +248,10 @@ public class ToolActivity extends AppCompatActivity {
                 System.out.println("Connection lost: ");
                 addToHistory("The Connection was lost.");
                 connected = false; updateConnectionButton();
+                // We clear our DB. But, if clean was false, then, this would still be present at the server
+                // side, which gives an incorrect picture at our side. Maybe, we clean only, if clean if true ?
+                // TBD
+                mysubsList.clear();
             }
 
             @Override
@@ -209,7 +268,7 @@ public class ToolActivity extends AppCompatActivity {
 
         MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
         mqttConnectOptions.setAutomaticReconnect(true);
-        mqttConnectOptions.setCleanSession(false);
+        mqttConnectOptions.setCleanSession(cleanVar);
 
         try {
             mqttAndroidClient.connect(mqttConnectOptions, null, new IMqttActionListener() {
@@ -319,6 +378,12 @@ public class ToolActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        /*setContentView(R.layout.tool_activity);
+        cl = (RadioButton) findViewById(R.id.cleanBUI);
+        rl = (RadioButton) findViewById(R.id.retainBUI);
+        cl.setOnCheckedChangeListener(this);
+        rl.setOnCheckedChangeListener(this);
+        */
         return true;
     }
 

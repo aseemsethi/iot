@@ -43,24 +43,41 @@
     </LinearLayout>
 
      <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/connectB"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight=".25"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:text="Connect" />
+            android:textSize="12sp"
+            android:text="Conn" />
 
         <Button
             android:id="@+id/disconnectB"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight=".25"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="100dp"
-            android:text="Disconnect" />
+            android:textSize="12sp"
+            android:text="Discon" />
+         <CheckBox
+             android:id="@+id/cleanBUI"
+             android:layout_width="0dp"
+             android:layout_weight=".25"
+             android:layout_height="wrap_content"
+             android:text="Clean"
+             android:textSize="12sp"/>
+         <CheckBox
+             android:id="@+id/retainBUI"
+             android:layout_width="0dp"
+             android:layout_weight=".25"
+             android:layout_height="wrap_content"
+             android:text="Retain"
+             android:textSize="14sp"/>
     </LinearLayout>
 
     <View
@@ -146,18 +163,24 @@
             android:id="@+id/text4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight=".5"
+            android:layout_weight=".3"
             android:inputType="textPersonName"
             android:background="@drawable/my_border"
-            android:text="Subscribe Topic:" />
+            android:text="Subscribe:" />
         <EditText
             android:id="@+id/mqtt_topicS"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight=".5"
+            android:layout_weight=".4"
             android:text="Topic1"
             android:textSize="12sp"
             android:inputType="textPersonName" />
+        <Button
+            android:id="@+id/sysB"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".3"
+            android:text="$SYS/#" />
     </LinearLayout>
 
     <LinearLayout
