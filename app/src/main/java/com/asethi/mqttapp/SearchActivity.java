@@ -1,6 +1,7 @@
 package com.asethi.mqttapp;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
@@ -187,7 +188,7 @@ public class SearchActivity extends AppCompatActivity {
                     progress.setProgress(val);
                     /* for (String s : hosts) { */
                     if (temp != null) {
-                        mAdapter.add(temp); temp = null;
+                        mAdapter.add(temp, Color.BLUE); temp = null;
                         mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount());
                     }
                 }

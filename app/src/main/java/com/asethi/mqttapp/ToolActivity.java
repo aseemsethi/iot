@@ -177,7 +177,7 @@ public class ToolActivity extends AppCompatActivity {
                         mqttAndroidClient.disconnect();
                     }
                     mqttAndroidClient = null;
-                    addToHistory("Disconnecting from : " + serverUri);
+                    addToHistory("Disconnecting from : " + serverUri, Color.RED);
                 } catch (MqttException e) {
                     e.printStackTrace();
                 }
@@ -201,13 +201,13 @@ public class ToolActivity extends AppCompatActivity {
         mysubs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addToHistory("My subscriptions: ");
+                addToHistory("My subscriptions: ", Color.BLUE);
                 InputMethodManager inputManager = (InputMethodManager)
                         getSystemService(Context.INPUT_METHOD_SERVICE);
                 inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                         InputMethodManager.HIDE_NOT_ALWAYS);
                 for (String s : mysubsList){
-                    addToHistory(s);
+                    addToHistory(s, Color.BLUE);
                 }
             }
         });
@@ -217,6 +217,7 @@ public class ToolActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         mAdapter = new HistoryAdapter(new ArrayList<String>());
+        mAdapter.setHasStableIds(true);
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -235,11 +236,11 @@ public class ToolActivity extends AppCompatActivity {
         String cid = cidT.getText().toString();
         if (cid.toString().isEmpty()) {
             clientId = "AndroidClient" + System.currentTimeMillis();
-            addToHistory("Client ID is null, Using: " + clientId);
+            addToHistory("Client ID is null, Using: " + clientId, Color.BLACK);
         } else {
             // When the Client ID changes, we need to clear the subscriptions
             clientId = cid;
-            addToHistory("Client ID is not null, Using: " + clientId);
+            addToHistory("Client ID is not null, Using: " + clientId, Color.BLACK);
             mysubsList.clear();
         }
         mqttAndroidClient = new MqttAndroidClient(getApplicationContext(), serverUri, clientId);
@@ -249,18 +250,18 @@ public class ToolActivity extends AppCompatActivity {
                 System.out.println("Connection completed: ");
                 connected = true; updateConnectionButton();
                 if (reconnect) {
-                    addToHistory(clientId + " Reconnected to : " + serverUri);
+                    addToHistory(clientId + " Reconnected to : " + serverUri, Color.GREEN);
                     // Because Clean Session is true, we need to re-subscribe
                     //subscribeToTopic();
                 } else {
-                    addToHistory(clientId + " Connected to: " + serverUri);
+                    addToHistory(clientId + " Connected to: " + serverUri, Color.GREEN);
                 }
             }
 
             @Override
             public void connectionLost(Throwable throwable) {
                 System.out.println("Connection lost: ");
-                addToHistory("The Connection was lost.");
+                addToHistory("The Connection was lost.", Color.RED);
                 connected = false; updateConnectionButton();
                 // We clear our DB. But, if clean was false, then, this would still be present at the server
                 // side, which gives an incorrect picture at our side. Maybe, we clean only, if clean if true ?
@@ -271,7 +272,7 @@ public class ToolActivity extends AppCompatActivity {
             @Override
             public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
                 System.out.println("Incoming Msg...: " + new String(mqttMessage.getPayload()));
-                addToHistory("Incoming message...: " + new String(mqttMessage.getPayload()));
+                addToHistory("Incoming message...: " + new String(mqttMessage.getPayload()), Color.MAGENTA);
             }
 
             @Override
@@ -289,7 +290,7 @@ public class ToolActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(IMqttToken iMqttToken) {
                     System.out.println("Connected to : " + serverUri);
-                    addToHistory("Connected to: " + serverUri);
+                    addToHistory("Connected to: " + serverUri, Color.GREEN);
                     DisconnectedBufferOptions disconnectedBufferOptions = new DisconnectedBufferOptions();
                     disconnectedBufferOptions.setBufferEnabled(true);
                     disconnectedBufferOptions.setBufferSize(100);
@@ -303,7 +304,7 @@ public class ToolActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(IMqttToken iMqttToken, Throwable throwable) {
                     System.err.println("Failed to connect to : " + serverUri);
-                    addToHistory("Failed to connect to: " + serverUri);
+                    addToHistory("Failed to connect to: " + serverUri, Color.RED);
                     connected = false; updateConnectionButton();
                 }
             });
@@ -312,11 +313,11 @@ public class ToolActivity extends AppCompatActivity {
         }
     }
 
-    private void addToHistory(String mainText){
+    private void addToHistory(String mainText, int color){
         String format = simpleDateFormat.format(System.currentTimeMillis());
 
         System.out.println("LOG: " + mainText);
-        mAdapter.add(format + ": " + mainText);
+        mAdapter.add(format + ": " + mainText, color);
         mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount());
         /* Snackbar.make(findViewById(android.R.id.content), mainText, Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show();
@@ -328,12 +329,12 @@ public class ToolActivity extends AppCompatActivity {
         String typedTopicS = inputTopicS.getText().toString();
         subscriptionTopic = typedTopicS;
         if (mqttAndroidClient == null) {
-            addToHistory(clientId + " Not connected to server");
+            addToHistory(clientId + " Not connected to server", Color.GREEN);
             return;
         }
         // Check if already subscribed to the same topic
         if (mysubsList.contains(subscriptionTopic)) {
-            addToHistory("Already subscribed to: " + subscriptionTopic);
+            addToHistory("Already subscribed to: " + subscriptionTopic, Color.GREEN);
             return;
         }
         mysubsList.add(subscriptionTopic); //this adds an element to the list.
@@ -343,13 +344,13 @@ public class ToolActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(IMqttToken iMqttToken) {
                     System.out.println(clientId + " Successfully subscribed to topic : " + subscriptionTopic);
-                    addToHistory(clientId + " Subscribed to : " + subscriptionTopic);
+                    addToHistory(clientId + " Subscribed to : " + subscriptionTopic, Color.GREEN);
                 }
 
                 @Override
                 public void onFailure(IMqttToken iMqttToken, Throwable throwable) {
                     System.err.println(clientId + " Failed to subscribe to topic : " + subscriptionTopic);
-                    addToHistory(clientId + " Subscription Failure: " + subscriptionTopic);
+                    addToHistory(clientId + " Subscription Failure: " + subscriptionTopic, Color.GREEN);
                 }
             });
 
@@ -357,7 +358,7 @@ public class ToolActivity extends AppCompatActivity {
                 @Override
                 public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
                     String msg = new String(mqttMessage.getPayload());
-                    addToHistory("Message Recvd: " + s + ":" + msg);
+                    addToHistory("Message Recvd: " + s + ":" + msg, Color.MAGENTA);
                     System.out.println("Message Recvd on Topic: " + s + ":" + msg);
                 }
             });
@@ -370,7 +371,7 @@ public class ToolActivity extends AppCompatActivity {
     public void publishMessage() {
         try {
             if (mqttAndroidClient == null) {
-                addToHistory("Not connected to server");
+                addToHistory("Not connected to server", Color.RED);
                 return;
             }
             EditText inputTopicP = (EditText) findViewById(R.id.mqtt_topicP);
@@ -379,7 +380,7 @@ public class ToolActivity extends AppCompatActivity {
             System.out.println("Publishing Message: ");
             EditText inputMsgP = (EditText) findViewById(R.id.messageUI);
             String publishMessage = inputMsgP.getText().toString();
-            addToHistory(clientId + " Publishing Message: " + publishMessage + "on Topic: " + publishTopic);
+            addToHistory(clientId + " Publishing Message: " + publishMessage + "on Topic: " + publishTopic, Color.BLUE);
             MqttMessage message = new MqttMessage();
             // message.setPayload(publishMessage.getBytes());
             // mqttAndroidClient.publish(publishTopic, message);
