@@ -19,6 +19,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
@@ -35,6 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import static android.R.attr.button;
+import static android.R.attr.color;
 
 public class ToolActivity extends AppCompatActivity {
     //implements CompoundButton.OnCheckedChangeListener {
@@ -328,7 +330,7 @@ public class ToolActivity extends AppCompatActivity {
             mqttAndroidClient.subscribe(subscriptionTopic, 0, null, new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken iMqttToken) {
-                    System.out.println(clientId + "Successfully subscribed to topic : " + subscriptionTopic);
+                    System.out.println(clientId + " Successfully subscribed to topic : " + subscriptionTopic);
                     addToHistory(clientId + " Subscribed to : " + subscriptionTopic);
                 }
 
