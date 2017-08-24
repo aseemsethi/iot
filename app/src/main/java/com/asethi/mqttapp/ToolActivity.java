@@ -54,6 +54,7 @@ public class ToolActivity extends AppCompatActivity {
     RecyclerView mRecyclerView;
     CheckBox cl, rl;
     Boolean cleanVar = false;
+    Boolean retainVar = false;
 
     // Stores all Subscriptions here
     ArrayList<String> mysubsList = new ArrayList<String>();
@@ -84,16 +85,27 @@ public class ToolActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (cl.isChecked()) {
-                    System.out.println("Aseem: checked is true");
+                    System.out.println("Aseem: cleanVar checked is true");
                     cleanVar = true;
                 } else {
-                    System.out.println("Aseem: checked is false");
+                    System.out.println("Aseem: cleanVar checked is false");
                     cleanVar = false;
                 }
             }
         });
         rl = (CheckBox) findViewById(R.id.retainBUI);
-
+        rl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (rl.isChecked()) {
+                    System.out.println("Aseem: retainVar checked is true");
+                    retainVar = true;
+                } else {
+                    System.out.println("Aseem: retainVar checked is false");
+                    retainVar = false;
+                }
+            }
+        });
 
         final Button stat = (Button) findViewById(R.id.button1);
         stat.setOnClickListener(new View.OnClickListener() {
@@ -365,11 +377,13 @@ public class ToolActivity extends AppCompatActivity {
             String typedTopicP = inputTopicP.getText().toString();
             publishTopic = typedTopicP;
             System.out.println("Publishing Message: ");
+            EditText inputMsgP = (EditText) findViewById(R.id.messageUI);
+            String publishMessage = inputMsgP.getText().toString();
             addToHistory(clientId + " Publishing Message: " + publishMessage + "on Topic: " + publishTopic);
             MqttMessage message = new MqttMessage();
-            message.setPayload(publishMessage.getBytes());
-            mqttAndroidClient.publish(publishTopic, message);
-
+            // message.setPayload(publishMessage.getBytes());
+            // mqttAndroidClient.publish(publishTopic, message);
+            mqttAndroidClient.publish(publishTopic, publishMessage.getBytes(), 0, retainVar);
         } catch (MqttException e) {
             System.err.println("Error publishing: " + e.getMessage());
             e.printStackTrace();
