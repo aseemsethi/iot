@@ -354,6 +354,7 @@ public class ToolActivity extends AppCompatActivity {
                 }
             });
 
+            
             mqttAndroidClient.subscribe(subscriptionTopic, 0, new IMqttMessageListener() {
                 @Override
                 public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
